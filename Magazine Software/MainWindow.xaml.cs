@@ -122,10 +122,10 @@ namespace Magazine_Software
             {
                 connection = new SqlConnection(connectionString);
                 connection.Open();
-                string sql = "select R.ID_request, R.data_request, P.last_name, P.first_name, P.phone, P.e_mail " +
-                                "from[dbo].[Request] R join[dbo].[Client] C on R.client = C.ID_client join[dbo].[Address] A " +
-                                "on C.address_client = A.ID_address join[dbo].[Personal_info] P " +
-                                "on P.ID_personal_info = C.personal_info where A.city = 'Київ'";
+                string sql = "select R.ID_request, R.data_request, CF.name_firm, P.last_name, P.first_name, P.phone, P.e_mail " +
+                                "from [dbo].[Request] R left join [dbo].[Client_firm] CF on R.client_firm = CF.ID_firm left join [dbo].[Client] C " +
+                                "on R.client = C.ID_client join[dbo].[Address] A on CF.address_firm = A.ID_address or C.address_client = A.ID_address join [dbo].[Personal_info] P " +
+                                "on P.ID_personal_info = CF.personal_info_confidant or P.ID_personal_info = C.personal_info where A.city = 'Київ'";
 
                 SqlCommand command = new SqlCommand(sql, connection);
                 SqlDataReader dataReader = command.ExecuteReader();
@@ -133,51 +133,26 @@ namespace Magazine_Software
                 if (dataReader.HasRows)
                 {
                     WindowQuery windowQuery = new WindowQuery();
-                    DataGrid dataGrid = windowQuery.dataGridQuery;
                     // Generation template DataGrid and binding with fields object Query2
-                    List<string> listNameColumn = new List<string> { "ID", "DataRequest", "LastName", "FirstName", "Phone", "EMail" };
-                    generationColumns(listNameColumn, dataGrid);
-
-                    //DataGridTextColumn col0 = new DataGridTextColumn();
-                    //col0.Header = dataReader.GetName(0);
-                    //col0.Binding = new Binding("ID");
-                    //windowQuery.dataGridQuery.Columns.Add(col0);           
-
-
-                    //DataGridTextColumn col1 = new DataGridTextColumn();
-                    //col1.Header = dataReader.GetName(1);
-                    //col1.Binding = new Binding("DataRequest");
-                    //windowQuery.dataGridQuery.Columns.Add(col1);
-
-                    //DataGridTextColumn col2 = new DataGridTextColumn();
-                    //col2.Header = dataReader.GetName(2);
-                    //col2.Binding = new Binding("LastName");
-                    //windowQuery.dataGridQuery.Columns.Add(col2);
-
-                    //DataGridTextColumn col3 = new DataGridTextColumn();
-                    //col3.Header = dataReader.GetName(3);
-                    //col3.Binding = new Binding("FirstName");
-                    //windowQuery.dataGridQuery.Columns.Add(col3);
-
-                    //DataGridTextColumn col4 = new DataGridTextColumn();
-                    //col4.Header = dataReader.GetName(4);
-                    //col4.Binding = new Binding("Phone");
-                    //windowQuery.dataGridQuery.Columns.Add(col4);
-
-                    //DataGridTextColumn col5 = new DataGridTextColumn();
-                    //col5.Header = dataReader.GetName(1);
-                    //col5.Binding = new Binding("EMail");
-                    //windowQuery.dataGridQuery.Columns.Add(col5);
-
+                    List<string> listNameColumn = new List<string> { "ID", "DataRequest", "FirmName", "LastName", "FirstName", "Phone", "EMail" };
+                    
+                    for (int i = 0; i < listNameColumn.Count; i++)
+                    {
+                        DataGridTextColumn col = new DataGridTextColumn();
+                        col.Header = listNameColumn[i].ToString();
+                        col.Binding = new Binding(listNameColumn[i].ToString());
+                        windowQuery.dataGridQuery.Columns.Add(col);
+                    }
                     while (dataReader.Read())
                     {
                         Query2 query = new Query2();
                         query.ID = dataReader.GetInt32(0);
                         query.DataRequest = dataReader.GetValue(1).ToString();
-                        query.LastName = dataReader.GetString(2);
-                        query.FirstName = dataReader.GetString(3);
-                        query.Phone = dataReader.GetString(4);
-                        query.EMail = dataReader.GetString(5);
+                        query.FirmName = dataReader[2].ToString();
+                        query.LastName = dataReader.GetString(3);
+                        query.FirstName = dataReader.GetString(4);
+                        query.Phone = dataReader.GetString(5);
+                        query.EMail = dataReader.GetString(6);
                         windowQuery.dataGridQuery.Items.Add(query);
                     }
                     windowQuery.Show();
@@ -191,21 +166,9 @@ namespace Magazine_Software
             }
             finally
             {
-                if (connection != null)
-                    connection.Close();
+                if (connection != null) connection.Close();
             }
         }
 
-        private void generationColumns (List<string>ListNameColumn, DataGrid datagrid)
-        {
-            foreach(string nameColumn in ListNameColumn)
-            {
-                DataGridTextColumn col = new DataGridTextColumn();
-                col.Header = nameColumn.ToString();
-                col.Binding = new Binding(nameColumn.ToString());
-                dataGrid.Columns.Add(col);
-            }
-        }
-        
     }
 }
