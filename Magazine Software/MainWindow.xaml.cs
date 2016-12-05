@@ -29,6 +29,7 @@ namespace Magazine_Software
             InitializeComponent();
             connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
         }
+
         /// <summary>
         /// Execute query1 - select request with seleceted Manager and selected Item software
         /// Result query into DataGrid with DataReader and DataTable
@@ -170,5 +171,15 @@ namespace Magazine_Software
             }
         }
 
+        /// <summary>
+        /// Create new Window for operation Update information about Client
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button4_Click(object sender, RoutedEventArgs e)
+        {
+            Client AddClient = new Client();
+            AddClient.Show();
+        }
     }
 }
